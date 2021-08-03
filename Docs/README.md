@@ -11,6 +11,40 @@ A simple password generator with graphical interface.
 - Include punctuation.
 - Include whitespaces.
 
+## Installation
+To install **Password Generator GUI** follow these steps.
+1. First you need to clone this repository by pasting this command in your terminal:
+```shell
+git clone https://github.com/Patitotective/password_generator_gui
+```
+2. Then enter to the created directory:
+```shell
+cd password_generator_gui
+```
+3. Install the requirements:
+- Windows:
+```shell
+pip install -r requirements.txt
+```
+- Linux/MacOSX:
+```shell
+pip3 install -r requirements.txt
+```
+
+4. And if you are a Linux user you will need to install xclip:
+```shell
+sudo apt-get install xclip
+```
+5. Now you can run `main.py`:
+- Windows:
+```shell
+python main.py
+```
+- Linux/MacOSX:
+```shell
+python3 main.py
+```
+
 ## Links
 
 - GitHub page: [https://github.com/Patitotective/password_generator_gui](https://github.com/Patitotective/password_generator_gui).
