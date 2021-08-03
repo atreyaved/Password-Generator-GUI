@@ -55,7 +55,7 @@ class MainWindow(QWidget):
 
 	def frame1(self):
 		# Logo
-		image = QPixmap("logo.png")
+		image = QPixmap("Images/logo.png")
 		logo = QLabel()
 		logo.setPixmap(image)
 		logo.setAlignment(QtCore.Qt.AlignCenter)
