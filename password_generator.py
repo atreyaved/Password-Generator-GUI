@@ -17,7 +17,7 @@ class PasswordGenerator:
 
 		length = self.divide(length) if first else [length, length]
 
-		for e, i in enumerate(random.sample(range(-99999, 99999), length[0])):
+		for e, i in enumerate(random.sample(range(- length[0] * 10, length[0] * 10), length[0])):
 			password = self.add_char(password, chars=chars)
 
 		password = self.mess_string( password + self.generate_password(first=False, length=length[1], chars=chars) if first else password )
@@ -84,7 +84,7 @@ class PasswordGenerator:
 
 		nrandom = random.randint(0, len(allList)-1)
 		lenList = len(allList[nrandom])
-		return allList[ nrandom ][ random.randint(-99999, 99999) %  lenList] 
+		return allList[ nrandom ][ random.randint(-len(allList[nrandom])*10, len(allList[nrandom])*10) %  lenList] 
 
 	def mess_string(self, myStr: str):
 		myList = [i for i in myStr]
@@ -94,8 +94,11 @@ class PasswordGenerator:
 		return "".join(result)
 
 def generate_password(chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": False, "whitespace": False}, length=15):
+	if not any([v for k, v in chars.items() if k.lower() != "length"]): 
+		return "You need select at least one."
+
 	passwordGenerator = PasswordGenerator()
-	password = passwordGenerator.generate_password(chars=chars, length=15)
+	password = passwordGenerator.generate_password(chars=chars, length=length)
 
 	return password
 
