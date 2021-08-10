@@ -39,16 +39,23 @@ class MainWindow(QMainWindow):
 
 	def on_resize(self):
 		w, h = self.size().width(), self.size().height()
-		logo_css = css_to_dict(self.app_widget.widgets["logo"][-1].styleSheet())
-		proportion = h / w
-			
-		#print("Window: ", w, h)
-		#print("Logo: ", logo_css["font-size"])
 		
-		#print(77.777777778*proportion)
+		logo = self.app_widget.widgets["logo"][-1]
+		logo_css = css_to_dict(logo.styleSheet())
 		
-		print("\n")
+		logo_size = logo.size()
+		
+		logo_w, logo_h = logo_size.width(), logo_size.height()
+		logo_font_size = logo_css['font-size'].replace("px", "")
+		logo_font_size = float(logo_font_size)
 
+		proportion = logo_w / logo_h
+
+		#print("Window: ", w, h)
+		#print(f"Logo font: {logo_font_size * proportion}, Logo size: {logo_w, logo_h}")
+		
+		#print(proportion)
+		
 	def window(self):
 		# Window settings
 		self.setWindowTitle(self.title)
@@ -84,95 +91,76 @@ class MainWindow(QMainWindow):
 			}
 			""")
 
-		widget_action_stylesheet = """
-			*{
-				background: #383838;
-				color: #ABABAB;
-				padding: 4px 4px;
-				font-size: 15px;
-				}
+		menu_stylesheet = (
+			"QMenu {"
+			"	background: #383838;"
+			"	color: #ABABAB;"
+			"	font-size: 15px;"
+			"}"
+			"QMenu::item:selected {"
+			"	background: #4C4C4C;"
+			"	color: #ffffff;"
+			"}"
+			"QMenu::item:pressed {"
+			"	background: #595959;"
+			"}"
+		)
 
-			*:hover{
-				background: #4C4C4C;
-				color: #ffffff;
-			}
-			*:pressed {
-				background: #595959;
-			}
-		"""
-		
 		# File menu
 		file_menu = bar.addMenu('&File')
+		file_menu.setStyleSheet(menu_stylesheet)
 		
-		
-		# Adding actions to file menu
-		settings_action = self.create_action_widget("Settings", 
-			file_menu, 
-			stylesheet=widget_action_stylesheet, 
-			callback=self.app_widget.create_settings_dialog, 
-			shortcut="Ctrl+S")
-		
-		close_action = self.create_action_widget("Close", 
-			file_menu, 
-			stylesheet=widget_action_stylesheet, 
-			callback=self.close_app, 
-			shortcut="Ctrl+Q")
+		settings_action = QAction(self)
+		settings_action.setShortcut("Ctrl+S")
+		settings_action.setText("Settings")
+		settings_action.triggered.connect(self.app_widget.create_settings_dialog)
+
+		file_menu.addAction(settings_action)
+
+		close_action = QAction("Close", self)
+		close_action.setShortcut("Ctrl+Q")
+		close_action.triggered.connect(self.close_app)
+
+		file_menu.addAction(close_action)
 
 		# Edit menu
 		edit_menu = bar.addMenu('&Edit')
-		
+		edit_menu.setStyleSheet(menu_stylesheet)
+
 		# Adding actions to edit menu
-		generate_action = self.create_action_widget('Generate', 
-			edit_menu, 
-			stylesheet=widget_action_stylesheet, 
-			callback=self.app_widget.generate_password, 
-			shortcut="Ctrl+G")
-		
-		copy_action = self.create_action_widget('Copy', 
-			edit_menu, 
-			stylesheet=widget_action_stylesheet, 
-			callback=self.app_widget.copy_password, 
-			shortcut="Ctrl+C")
+		generate_action = QAction("Generate", self)
+		generate_action.setShortcut("Ctrl+G")
+		generate_action.triggered.connect(self.app_widget.generate_password)
+
+		edit_menu.addAction(generate_action)
+
+		copy_action = QAction("Copy", self)
+		copy_action.setShortcut("Ctrl+C")
+		copy_action.triggered.connect(self.app_widget.copy_password)
+
+		edit_menu.addAction(copy_action)
 
 		# Edit menu
 		about_menu = bar.addMenu('&About')
-		
+		about_menu.setStyleSheet(menu_stylesheet)
+
 		# Adding actions to edit menu
-		about_app_action = self.create_action_widget('About me', 
-			about_menu, 
-			stylesheet=widget_action_stylesheet, 
-			callback=self.app_widget.create_about_me_dialog, 
-			shortcut="Ctrl+m")
+		about_me_action = self.create_qaction(menu=about_menu, 
+			text="About me", 
+			shortcut="Ctrl+M", 
+			callback=self.app_widget.create_about_me_dialog)
 
-	def create_action_widget(self, text: str, menu, stylesheet: str="", callback: callable=lambda: print("No callback"), shortcut: str=""):
-		"""
-		Args:
-			text (str): The text to be displayed in the QWidgetAction.
-			menu (menuBar.addMenu): The menu to append the QWidgetAction.
-			stylesheet (str, optional=""): The stylesheet of the QWidgetAction (really the stylesheet of the Label).
-			callback (callable, optional=lambda: print("No callback")): The callback function to the QWidgetAction.
-			shortcut (str, optional=""): The shortcut to acces to the QWidgetAction
-		"""
-		action = QWidgetAction(self) # Create a QWidget action in QMainWindow
+	def create_qaction(self, menu, text: str, shortcut: str="", callback: callable=lambda: print("No callback")):
+		action = QAction(self)
+
+		action.setText(text)
+		action.setShortcut(shortcut)
+		menu.addAction(action)
 		
-		if shortcut != "": # If the shortcut isn't empty
-			key = shortcut.split("+")[0] # Split by + and get the modifier key (ctrl, shift, alt)
-			mnemo = shortcut.split("+")[1] # Split by + and get the key (a, b, c)
-			
-			### IF I COMMENT THESE THREE LINES THE QWIDGETACTIONS WORKS ###
-			text = text.replace(mnemo, f"<u>{mnemo}</u>", 1) # Underline the shortut letter 
-			text += f"{'&nbsp;'*3}" # Spacing between given text and shortcut
-			text += f"<span style='color: #ABABAB; font-size: 14px;'>{key}+{mnemo.capitalize()}</span>" # Add different color and font-size to the shortcut
+		action.triggered.connect(callback)
 
-		label = QLabel(text) # Create a QLabel with the text
-		label.setStyleSheet(stylesheet) # Set the given stylesheet to the QLabel
-		action.setDefaultWidget(label); # Set QLabel as default widget to QWidget
-		action.setShortcut(shortcut) # Set shortcut to QWidgetAction
+		return action
 
-		menu.addAction(action) # Add action to given menu (menuBar.addMenu)
-		action.triggered.connect(callback) # Connect the QWidgetAction with the given callback
-
-		return action # Return the QWidgetAction
 
 	def close_app(self):
 		self.close()
@@ -234,7 +222,7 @@ class App(QWidget):
 		# Logo
 		# image = QPixmap("Images/logo.png")
 		logo = QLabel("&lt;<span style='color:#64a314'>/</span><span style='color:#ffffff'>P45w0rD<br/>G3n3R4t0r</span><span style='color:#64a314'>/</span>&gt;")
-		logo.setStyleSheet("font-size: 70px; font-family: impact;")
+		logo.setStyleSheet("font-size: 80px; font-family: impact;")
 
 		#logo.setPixmap(image)
 		logo.setAlignment(QtCore.Qt.AlignCenter)
