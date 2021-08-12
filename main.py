@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (QApplication, QLabel, QPushButton,
 	QVBoxLayout, QWidget, QFileDialog, 
 	QGridLayout, QCheckBox, QDialog, 
 	QAction, QMainWindow, QWidgetAction, 
+	QMenu,  
 	QSpinBox, QScrollArea, qApp)
 
 from PyQt5.QtGui import QPixmap, QIcon
@@ -155,12 +156,13 @@ class MainWindow(QMainWindow):
 
 		action.setText(text)
 		action.setShortcut(shortcut)
+		action.setShortcutVisibleInContextMenu(True)
 		menu.addAction(action)
+
 		
 		action.triggered.connect(callback)
 
 		return action
-
 
 	def close_app(self):
 		self.close()
@@ -172,6 +174,10 @@ class MainWindow(QMainWindow):
 			self.app_widget.about_me_dialog.close()
 		except:
 			pass
+
+	def closeEvent(self, event):
+		self.close_app()
+		event.accept()
 
 class App(QWidget):
 	def __init__(self, parent=None):
@@ -286,6 +292,8 @@ class App(QWidget):
 		label.setCursor(QCursor(QtCore.Qt.IBeamCursor))
 		
 		label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+		label.setContextMenuPolicy(Qt.CustomContextMenu)
+		label.customContextMenuRequested.connect(lambda *args: None)
 		label.setStyleSheet(
 			"font-size: 25px;" + 
 			"color: white;" +
@@ -316,63 +324,39 @@ class App(QWidget):
 		dialog.setLayout(QGridLayout())
 
 		## Adding widgets ##
-
-		lower_check = QCheckBox("ASCII lowercase")
-		lower_check.setStyleSheet(
-			'''
+		checkbox_stylesheet = '''
 			*{
 				color: #E1E1E1;
 			}
 			*:hover {
 				color: #ffffff;
 			}
-			''')
-
-		lower_check.setChecked(self.settings.file["lowercase"])
-		lower_check.toggled.connect( lambda: self.settings.write_prefs("lowercase", lower_check.isChecked()) )
-
-		upper_check = QCheckBox("ASCII uppercase")
-		upper_check.setStyleSheet(
 			'''
-			*{
-				color: #E1E1E1;
-			}
-			*:hover {
-				color: #ffffff;
-			}
-			''')
 
-		upper_check.setChecked(self.settings.file["uppercase"])
-		upper_check.toggled.connect( lambda: self.settings.write_prefs("uppercase", upper_check.isChecked()) )
+		lower_check = self.create_checkbox("ASCII lowercase", 
+			stylesheet=checkbox_stylesheet, 
+			checked=self.settings.file["lowercase"], 
+			callback=lambda: self.settings.write_prefs("lowercase", lower_check.isChecked()))
 
-		digits_check = QCheckBox("Digits (1, 2...)")
-		digits_check.setStyleSheet(
-			'''
-			*{
-				color: #E1E1E1;
-			}
-			*:hover {
-				color: #ffffff;
-			}
-			''')
-
-		digits_check.setChecked(self.settings.file["digits"])
-		digits_check.toggled.connect( lambda: self.settings.write_prefs("digits", digits_check.isChecked()) )
-
-		punct_check = QCheckBox("Punctuation")
-		punct_check.setStyleSheet(
-			'''
-			*{
-				color: #E1E1E1;
-			}
-			*:hover {
-				color: #ffffff;
-			}
-			''')
+		upper_check = self.create_checkbox("ASCII uppercase", 
+			stylesheet=checkbox_stylesheet, 
+			checked=self.settings.file["uppercase"], 
+			callback=lambda: self.settings.write_prefs("uppercase", upper_check.isChecked()))
 		
-		punct_check.setChecked(self.settings.file["punctuation"])
-		punct_check.toggled.connect( lambda: self.settings.write_prefs("punctuation", punct_check.isChecked()) )
+		digits_check = self.create_checkbox("Digits (1, 2...)", 
+			stylesheet=checkbox_stylesheet, 
+			checked=self.settings.file["digits"], 
+			callback=lambda: self.settings.write_prefs("digits", digits_check.isChecked()))
 
+		punct_check = self.create_checkbox("Punctuation", 
+			stylesheet=checkbox_stylesheet, 
+			checked=self.settings.file["punctuation"], 
+			callback=lambda: self.settings.write_prefs("punctuation", punct_check.isChecked()))
+
+		repeated_char_check = self.create_checkbox("Repeated characters", 
+			stylesheet=checkbox_stylesheet, 
+			checked=self.settings.file["repeated_char"], 
+			callback=lambda: self.settings.write_prefs("repeated_char", repeated_char_check.isChecked()))
 
 		length_spinbox = QSpinBox()
 		length_spinbox.setMinimum(1)
@@ -399,15 +383,24 @@ class App(QWidget):
 		dialog.layout().addWidget(upper_check, 1, 0)
 		dialog.layout().addWidget(digits_check, 2, 0)
 		dialog.layout().addWidget(punct_check, 3, 0)
+		dialog.layout().addWidget(repeated_char_check, 4, 0)
 	
-		dialog.layout().addWidget(length_spinbox, 4, 0)
+		dialog.layout().addWidget(length_spinbox, 5, 0)
 
-		dialog.layout().addWidget(save_btn, 5, 0)
+		dialog.layout().addWidget(save_btn, 6, 0)
 
 		self.settings_dialog = dialog
 
 		dialog.exec_()
 	
+	def create_checkbox(self, text: str, stylesheet: str="", checked: bool=True, callback: callable=lambda x: print(f"No callback function {x}")):
+		checkbox = QCheckBox(text)
+		checkbox.setStyleSheet(stylesheet)
+		checkbox.setChecked(checked)
+		checkbox.toggled.connect(callback)
+
+		return checkbox
+
 	def create_about_me_dialog(self):
 		######## SET UP DIALOG ########
 		dialog = QDialog() # Creating dialog
@@ -443,7 +436,7 @@ class App(QWidget):
 
 	def generate_password(self):
 		# Generate a random password an set the password label text to it
-		npassword = password.generate_password(chars=self.settings.file, length=self.settings.file["length"])
+		npassword = password.generate_password(chars=self.settings.file, length=self.settings.file["length"], repeated_char=self.settings.file["repeated_char"])
 		self.widgets["label"][-1].setText(npassword)
 
 		# Set copy button text to copy

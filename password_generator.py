@@ -1,6 +1,7 @@
-import random
 import string
 import pyperclip
+import secrets
+import time 
 
 class PasswordGenerator:
 	def __init__(self):
@@ -10,106 +11,105 @@ class PasswordGenerator:
 		self.ABC = string.ascii_uppercase
 		self.digits = string.digits
 		self.punctuation = string.punctuation
-		self.whitespace = string.whitespace		
 
-	def generate_password(self, first=True, length = 15, chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": False, "whitespace": False}):
-		password = ""
+		self.all_char = self.ABC + self.abc + self.digits + self.punctuation
 
-		length = self.divide(length) if first else [length, length]
+	def generate_password(self, length = 15, chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": True}, repeated_char=False):
+		all_char = {
+			"lowercase": self.abc, 
+			"uppercase": self.ABC, 
+			"digits": self.digits * 3, 
+			"punctuation": self.punctuation * 2, 
+		}
 
-		for e, i in enumerate(random.sample(range(- length[0] * 10, length[0] * 10), length[0])):
-			password = self.add_char(password, chars=chars)
-
-		password = self.mess_string( password + self.generate_password(first=False, length=length[1], chars=chars) if first else password )
-
-		self.check_password(password)
-
-		return password
-
-	def add_char(self, password: str, chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": False, "whitespace": False}):
-		indx = len(password) - 1 
-
-		char = self.random_char(chars=chars)
-
-		password += char
-
-		return password
-
-	def divide(self, number, by=2):
-
-		int_division = number // by
-		if int_division * 2 != number:
-
-			return [int_division, int_division +1]
-
-		return [int_division] * 2
-
-	def check_password(self, password):
-		checks = [self.is_upper, self.is_lower, self.is_digit, self.is_punctuation, self.is_whitespace]
-
-		for e, char in enumerate(password):
-			for check in checks:
-				pass
-
-	def is_upper(self, char):
-		return char.isupper() 
-
-	def is_lower(self, char):
-		return char.islower()
-
-	def is_digit(self, char):
-		return char in self.digits 
-
-	def is_punctuation(self, char):
-		return char in self.punctuation
-
-	def is_whitespace(self, char):
-		return char in self.whitespace 
-
-	def random_char(self, chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": False, "whitespace": False}):
-		allList = []
+		selected_char_static = {}
 
 		for k, v in chars.items():
-			if k == "lowercase" and v:
-				allList.append(self.abc)
-			elif k == "uppercase" and v:
-				allList.append(self.ABC)
-			elif k == "digits" and v:
-				allList.append(self.digits)
-			elif k == "punctuation" and v:
-				allList.append(self.punctuation)
-			elif k == "whitespace" and v:
-				allList.append(self.whitespace)
+			if k in all_char and v:
+				selected_char_static[k] = all_char[k]
+		
+		selected_char = selected_char_static
+		password = ""
+		options = "".join(selected_char.values())
+		removed = ""
 
 
-		nrandom = random.randint(0, len(allList)-1)
-		lenList = len(allList[nrandom])
-		return allList[ nrandom ][ random.randint(-len(allList[nrandom])*10, len(allList[nrandom])*10) %  lenList] 
+		for i in range(length):
+			if not any(v for v in selected_char.values()): 
+				if not repeated_char:
+					return password
 
-	def mess_string(self, myStr: str):
-		myList = [i for i in myStr]
+				selected_char = selected_char_static
+			
+			if not options: options = "".join(selected_char.values())
+		
+			nchar = secrets.choice(options)
 
-		result = random.sample(myList, len(myList))
+			password += nchar
 
-		return "".join(result)
+			if not repeated_char:
+				selected_char = {k:v.replace(nchar, "") for k, v in selected_char.items()}
+			
+			options = "".join({key:val for key, val in selected_char.items() if key != self.char_type(nchar)}.values())
 
-def generate_password(chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": False, "whitespace": False}, length=15):
+			if removed != "":
+				options += selected_char[removed]
+
+			removed = self.char_type(nchar)	
+
+		return password
+
+	def ispunct(self, char):
+		return char in self.punctuation
+
+	def isequal(self, char1, char2):
+		if char1.islower() and char2.islower():
+			return True
+		elif char1.isupper() and char2.isupper():
+			return True
+		elif char1.isdigit() and char2.isdigit():
+			return True
+		elif self.ispunct(char1) and self.ispunct(char2):
+			return True
+		else:
+			return False
+
+	def char_type(self, char):
+		if char.isupper():
+			return "uppercase"
+		elif char.islower():
+			return "lowercase"
+		elif char.isdigit():
+			return "digits"
+		elif self.ispunct(char):
+			return "punctuation"
+		return False
+
+
+def generate_password(chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": True}, length=15, repeated_char=False):
 	if not any([v for k, v in chars.items() if k.lower() != "length"]): 
 		return "You need select at least one."
 
 	passwordGenerator = PasswordGenerator()
-	password = passwordGenerator.generate_password(chars=chars, length=length)
+	password = passwordGenerator.generate_password(chars=chars, length=length, repeated_char=repeated_char)
 
 	return password
 
 
 def main():
+	begin = time.time()
+	loop = 1
 
-	passwordGenerator = PasswordGenerator()
-	password = passwordGenerator.generate_password(chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": False, "whitespace": False}, length=15)
-	# pyperclip.copy(result)
+	for i in range(loop):
+		password = generate_password(chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": True}, length=10000, repeated_char=True)
 
-	print(password, len(password))
+		pyperclip.copy(password)
+
+		print(f"{password} Length:{len(password)}\n")
+
+	time_ = time.time() - begin
+
+	print(f"Time: {time_}\nAverage: {time_/loop}")
 
 if __name__ == "__main__":
 	main()
