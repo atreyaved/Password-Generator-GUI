@@ -14,12 +14,12 @@ class PasswordGenerator:
 
 		self.all_char = self.ABC + self.abc + self.digits + self.punctuation
 
-	def generate_password(self, length = 15, chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": True}, repeated_char=False):
+	def generate_password(self, length = 15, chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": True}, repeated_char=False, consecutive_char=False):
 		all_char = {
 			"lowercase": self.abc, 
 			"uppercase": self.ABC, 
-			"digits": self.digits * 3, 
-			"punctuation": self.punctuation * 2, 
+			"digits": self.digits * 3 if not consecutive_char else self.digits * 2, 
+			"punctuation": self.punctuation, 
 		}
 
 		selected_char_static = {}
@@ -33,6 +33,8 @@ class PasswordGenerator:
 		options = "".join(selected_char.values())
 		removed = ""
 
+		if not any(v for v in selected_char_static.values()):
+			return "Select at least one type of characters."
 
 		for i in range(length):
 			if not any(v for v in selected_char.values()): 
@@ -50,7 +52,8 @@ class PasswordGenerator:
 			if not repeated_char:
 				selected_char = {k:v.replace(nchar, "") for k, v in selected_char.items()}
 			
-			options = "".join({key:val for key, val in selected_char.items() if key != self.char_type(nchar)}.values())
+			if not consecutive_char:
+				options = "".join({key:val for key, val in selected_char.items() if key != self.char_type(nchar)}.values())
 
 			if removed != "":
 				options += selected_char[removed]
@@ -86,26 +89,22 @@ class PasswordGenerator:
 		return False
 
 
-def generate_password(chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": True}, length=15, repeated_char=False):
-	if not any([v for k, v in chars.items() if k.lower() != "length"]): 
-		return "You need select at least one."
-
+def generate_password(chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": True}, length=15, repeated_char=False, consecutive_char=False):
 	passwordGenerator = PasswordGenerator()
-	password = passwordGenerator.generate_password(chars=chars, length=length, repeated_char=repeated_char)
+	password = passwordGenerator.generate_password(chars=chars, length=length, repeated_char=repeated_char, consecutive_char=consecutive_char)
 
 	return password
 
-
 def main():
 	begin = time.time()
-	loop = 1
+	loop = 10
 
 	for i in range(loop):
-		password = generate_password(chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": True}, length=10000, repeated_char=True)
+		password = generate_password(chars={"lowercase": True, "uppercase": True, "digits": True, "punctuation": True}, length=15, repeated_char=False, consecutive_char=False)
 
 		pyperclip.copy(password)
 
-		print(f"{password} Length:{len(password)}\n")
+		print(f"\n{password} Length:{len(password)}\n")
 
 	time_ = time.time() - begin
 

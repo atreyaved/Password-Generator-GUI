@@ -1,7 +1,0 @@
-#PREFS
-lowercase=True
-uppercase=True
-digits=True
-punctuation=True
-repeated_char=True
-length=10000

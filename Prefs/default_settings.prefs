@@ -1,9 +1,0 @@
-#PREFS
-lowercase=True # ASCII
-uppercase=True # ASCII
-digits=True # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-punctuation=True # .!""$"$%/()"%=...
-repeated_char=False # Could the password include repeated characters?
-length=15 # The length of the password
-# This file was created using PREFS python library
-# For more information see https://github.com/Patitotective/PREFS

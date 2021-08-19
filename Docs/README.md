@@ -9,7 +9,8 @@ A simple password generator with graphical interface.
 - Include ASCII uppercase.
 - Include digits.
 - Include punctuation.
-- Include whitespaces.
+- Allow consecutive characters (upper and lowercase, digits, punctuation).
+- Allow repeated characters.
 
 ## Installation
 To install **Password Generator GUI** follow these steps.

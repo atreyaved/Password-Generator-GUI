@@ -3,12 +3,15 @@
 
 block_cipher = None
 
+with open('requirements.txt') as f:
+    hiddenimports = f.read().splitlines()
 
 a = Analysis(['main.py'],
-             pathex=['/home/cristobal/Documents/Projects/password_generator_gui/Code'],
+             #pathex=['C:\\Users\\crist\\Documents\\password_generator_gui\\Code'], # Windows
+             pathex=['/home/cristobal/Documents/Projects/password_generator_gui/Code'], # Linux
              binaries=[],
-             datas=[("Images/icon.ico", "Images"), ("Images/icon.png", "Images")],
-             hiddenimports=['PREFS', 'PyQt5', 'pyperclip'],
+             datas=[],
+             hiddenimports=hiddenimports,
              hookspath=[],
              hooksconfig={},
              runtime_hooks=[],
@@ -27,7 +30,6 @@ exe = EXE(pyz,
           a.datas,  
           [],
           name='Password Generator',
-          icon='Images/icon.ico',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
