@@ -3,12 +3,7 @@ import sys
 import os
 
 # Libraries
-from PyQt5.QtWidgets import (QApplication, QLabel, QPushButton, 
-	QVBoxLayout, QWidget, QFileDialog, 
-	QGridLayout, QCheckBox, QDialog, 
-	QAction, QMainWindow, QWidgetAction, 
-	QMenu,  QShortcut, QToolTip, QHBoxLayout, 
-	QSpinBox, QScrollArea, qApp) 
+from PyQt5.QtWidgets import *
 
 from PyQt5.QtGui import QPixmap, QIcon, QFontDatabase, QKeySequence
 from PyQt5 import QtGui, QtCore
@@ -36,7 +31,11 @@ class MainWindow(QMainWindow):
 		
 		self.resized.connect(self.on_resize)
 
-		self.window()
+		statusBar = QStatusBar()
+		statusBar.setStyleSheet("background: #383838; color: white;")
+		self.setStatusBar(statusBar)
+
+		self.create_window()
 		self.create_menu_bar()
 
 	def resizeEvent(self, event):
@@ -46,7 +45,7 @@ class MainWindow(QMainWindow):
 	def on_resize(self):
 		pass
 	
-	def window(self):
+	def create_window(self):
 		# Window settings
 		self.setWindowTitle(self.title)
 		self.setMinimumSize(500, 470)
@@ -140,8 +139,8 @@ class MainWindow(QMainWindow):
 
 		about_me_action = self.create_qaction(
 			menu=about_menu, 
-			text="About me", 
-			shortcut="Ctrl+m", 
+			text="About Password Generator GUI", 
+			shortcut="Ctrl+P", 
 			callback=self.app_widget.create_about_me_dialog)
 
 	def create_qaction(self, menu, text: str, shortcut: str="", callback: callable=lambda: print("No callback")):
@@ -179,9 +178,9 @@ class MainWindow(QMainWindow):
 
 class MainWidget(QWidget):
 	def __init__(self, parent=None):
-		super(MainWidget, self).__init__()
+		super().__init__()
 
-		
+		self.parent = parent
 		self.widgets = {
 			"logo": [], 
 			"generate_btn": [], 
@@ -191,14 +190,14 @@ class MainWidget(QWidget):
 
 		self.init_prefs()
 
-		self.window()
+		self.create_window()
 
 	def init_prefs(self):
 		prefs = {"lowercase": True, "uppercase": True, "digits": True, "punctuation": True, "repeated_char": False, "consecutive_char": False, "length":15}
 
 		self.settings = PREFS.PREFS(prefs, filename="Prefs/settings")
  
-	def window(self):
+	def create_window(self):
 		##### Creating window
 		self.app = QApplication(sys.argv)
 
@@ -209,7 +208,7 @@ class MainWidget(QWidget):
 		QFontDatabase.addApplicationFont(':/impact.ttf')
 
 		# First frame
-		self.frame1()
+		self.main_frame()
 
 	def clear_widgets(self):
 		for key, val in self.widgets.items():
@@ -219,7 +218,7 @@ class MainWidget(QWidget):
 			for i in range(len(val)):
 				val.pop()
 
-	def frame1(self):
+	def main_frame(self):
 		# Logo
 		logo = QLabel("&lt;<span style='color:#64a314'>/</span><span style='color:#ffffff'>P45w0rD<br/>G3n3R4t0r</span><span style='color:#64a314'>/</span>&gt;")
 		logo.setStyleSheet("font-size: 80px; font-family: impact;")
@@ -275,12 +274,6 @@ class MainWidget(QWidget):
 		# Password label
 		scrollable = ScrolLabel()		
 
-		scrollable.label.setText(password.generate_password(
-			chars=self.settings.file, 
-			length=self.settings.file["length"], 
-			repeated_char=self.settings.file["repeated_char"], 
-			consecutive_char=self.settings.file["consecutive_char"]))
-
 		scrollable.label.setAlignment(QtCore.Qt.AlignCenter)
 		
 		scrollable.label.setCursor(QCursor(QtCore.Qt.IBeamCursor))
@@ -301,11 +294,12 @@ class MainWidget(QWidget):
 		scrollable.setFixedHeight(120)
 
 		self.widgets["label"].append(scrollable)
+		self.generate_password()
 
 		# Setting widgets in grid
 		self.layout().addWidget(self.widgets["logo"][-1], 0, 0, 1, 0)
 		self.layout().addWidget(self.widgets["generate_btn"][-1], 1, 0, 1, 0)
-		self.layout().addWidget(self.widgets["copy_btn"][-1], 2, 1)
+		self.layout().addWidget(self.widgets["copy_btn"][-1], 2, 2)
 		self.layout().addWidget(self.widgets["label"][-1], 2, 0)
 
 	def create_settings_dialog(self):
@@ -323,8 +317,8 @@ class MainWidget(QWidget):
 
 		######## SET UP DIALOG ########
 		dialog = QDialog() # Creating dialog
-		
-		dialog.setWindowTitle("Settings") # Setting dialog tittle
+
+		dialog.setWindowTitle("Settings") # Setting dialog title
 
 		dialog.setWindowModality(Qt.ApplicationModal) # True blocks its parent window
 		dialog.setLayout(QGridLayout())
@@ -408,13 +402,13 @@ class MainWidget(QWidget):
 			stylesheet=checkbox_stylesheet, 
 			checked=self.settings.file["repeated_char"], 
 			callback=lambda: self.settings.write_prefs("repeated_char", repeated_char_check.isChecked()), 
-			tooltip="A character can appear more than once.")
+			tooltip="The password can include repeated characters.")
 
 		consecutive_char_check = self.create_checkbox("Consecutive characters", 
 			stylesheet=checkbox_stylesheet, 
 			checked=self.settings.file["consecutive_char"], 
 			callback=lambda: self.settings.write_prefs("consecutive_char", consecutive_char_check.isChecked()), 
-			tooltip="Upper or lowercase, digits or punctuation can be consecutive.")
+			tooltip="Uppercase, lowercase, digits or punctuation can be consecutive (AB, ab, 01, !?).")
 
 		length_spinbox = self.create_spinbox(
 			minium=1, 
@@ -501,7 +495,7 @@ class MainWidget(QWidget):
 
 		if not tooltip == None:
 			spinbox.setToolTip(tooltip)
-
+	
 		spinbox.valueChanged.connect(callback)
 
 		return spinbox
@@ -510,13 +504,13 @@ class MainWidget(QWidget):
 		######## SET UP DIALOG ########
 		dialog = QDialog() # Creating dialog
 		
-		dialog.setWindowTitle("About me") # Setting dialog tittle
+		dialog.setWindowTitle("About me") # Setting dialog title
 		dialog.setStyleSheet("background: #383838; color: #ffffff") # Setting dialog styling
 		dialog.setWindowModality(True) # False blocks its parent window
 		dialog.setLayout(QGridLayout())
 
 		## Adding widgets ##
-		about_label = QLabel("This is a simple GUI app written in Python using PyQt5.<br/><br/>Contact me: <br/>&nbsp;&nbsp;&nbsp;&nbsp;Discord: patitotective#0127<br/>&nbsp;&nbsp;&nbsp;&nbsp;Mail: <a href='mailto:cristobalriaga@gmail.com' style='color: #8ebf42'>cristobalriaga@gmail.com</a>", dialog)
+		about_label = QLabel("<strong>Password Generator <i>GUI</i></strong> is a simple app written in Python using PyQt5.<br/><br/>Contact me: <br/>&nbsp;&nbsp;&nbsp;&nbsp;Discord: patitotective#0127<br/>&nbsp;&nbsp;&nbsp;&nbsp;Mail: <a href='mailto:cristobalriaga@gmail.com' style='color: #8ebf42'>cristobalriaga@gmail.com</a>", dialog)
 		about_label.setOpenExternalLinks(True)
 
 		about_prefs_label = QLabel("<strong>Password Generator <i>GUI</i></strong> uses <a href='https://patitotective.github.io/PREFS' style='color: #8ebf42'>PREFS python library</a> to store the settings.")
@@ -552,8 +546,9 @@ class MainWidget(QWidget):
 			repeated_char=self.settings.file["repeated_char"], 
 			consecutive_char=self.settings.file["consecutive_char"])
 		
-		self.widgets["label"][-1].setText(npassword)
+		self.widgets["label"][-1].setText(npassword[0])
 
+		self.parent.statusBar().showMessage(npassword[1])
 
 		# Set copy button text to copy
 		self.widgets["copy_btn"][-1].setText("Copy")

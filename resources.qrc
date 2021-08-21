@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file alias="checkbox_checked.png">Images/checkbox_checked.png</file>
+    <file alias="icon.png">Images/icon.png</file>
+    <file alias="impact.ttf">Fonts/impact.ttf</file>
+</qresource>
+</RCC>

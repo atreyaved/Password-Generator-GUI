@@ -9,7 +9,7 @@ A simple password generator with graphical interface.
 - Include ASCII uppercase.
 - Include digits.
 - Include punctuation.
-- Allow consecutive characters (upper and lowercase, digits, punctuation).
+- Uppercase, lowercase, digits, punctuation can be consecutive (AB, ab, 01, !?).
 - Allow repeated characters.
 
 ## Installation

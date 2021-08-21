@@ -34,12 +34,12 @@ class PasswordGenerator:
 		removed = ""
 
 		if not any(v for v in selected_char_static.values()):
-			return "Select at least one type of characters."
+			return "", "Please select at least one type of characters."
 
 		for i in range(length):
 			if not any(v for v in selected_char.values()): 
 				if not repeated_char:
-					return password
+					return password, "Couldn't reach requested lenght because repeated characters is disabled."
 
 				selected_char = selected_char_static
 			
@@ -60,7 +60,7 @@ class PasswordGenerator:
 
 			removed = self.char_type(nchar)	
 
-		return password
+		return password, ""
 
 	def ispunct(self, char):
 		return char in self.punctuation
