@@ -46,7 +46,7 @@ python3 main.py
 
 ## Links
 
-- GitHub page: [https://github.com/Patitotective/password_generator_gui](https://github.com/Patitotective/password_generator_gui).
+- GitHub page: [https://github.com/Patitotective/password_generator_gui](https://github.com/Patitotective/Password-Generator-GUI).
 
 - Contact me:
   - Discord: **patitotective#0127**.
