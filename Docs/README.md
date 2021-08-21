@@ -13,38 +13,36 @@ A simple password generator with graphical interface.
 - Allow repeated characters.
 
 ## Installation
-To install **Password Generator GUI** follow these steps.
-1. First you need to clone this repository by pasting this command in your terminal:
-```shell
-git clone https://github.com/Patitotective/password_generator_gui
+You can go to the [**Release Page**](https://github.com/Patitotective/Password-Generator-GUI/releases/tag/v0.1) and download `Password_Generator_GUI.exe` for _Windows_ or `Password_Generator_GUI.bin` for _Linux_.  
+Or click [this link for _Windows_](https://github.com/Patitotective/Password-Generator-GUI/releases/download/v0.1/Password_Generator_GUI.exe) or [this for _Linux_](https://github.com/Patitotective/Password-Generator-GUI/releases/download/v0.1/Password_Generator_GUI.bin).  
+
+## Run application from source code
+1. First you need to clone this repository by pasting this command into your terminal:
+```bash
+git clone https://github.com/Patitotective/Password-Generator-GUI
 ```
 2. Then enter to the created directory:
-```shell
-cd password_generator_gui
+```bash
+cd Password-Generator-GUI
 ```
 3. Install the requirements:
 - Windows:
-```shell
+```bash
 pip install -r requirements.txt
 ```
-- Linux/MacOSX:
-```shell
+- Linux/MacOS:
+```bash
 pip3 install -r requirements.txt
 ```
-
-4. And if you are a Linux user you will need to install xclip:
-```shell
-sudo apt-get install xclip
-```
-5. Now you can run `main.py`:
+4. Now you can run `main.py`:
 - Windows:
-```shell
+```bash
 python main.py
 ```
 - Linux/MacOSX:
-```shell
+```bash
 python3 main.py
-```
+``` 
 
 ## Links
 
@@ -55,4 +53,4 @@ python3 main.py
   - Email: **cristobalriaga@gmail.com**.
 
 
-**v0.0.1**
+**v0.1**
